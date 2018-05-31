@@ -47,6 +47,10 @@ def get_products():
     res = get_products_from_db()
     return jsonify(res)
 
+@app.route("/product/healthz", methods=['GET'])
+def get_health():
+    return "OK"
+
 def get_products_from_db():
     return [rec for rec in db_client[DB_NAME][COL_NAME].find({}, {'_id': False})]
 
