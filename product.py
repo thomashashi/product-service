@@ -9,10 +9,8 @@ DB_PORT = 'DB_PORT'
 DB_USER = 'DB_USER'
 DB_PW = 'DB_PW'
 
-#DB_NAME = 'bbthe90s'
-#COL_NAME = 'products'
-DB_NAME = os.environ.get(DB_NAME)
-COL_NAME = os.environ.get(COL_NAME)
+DB_NAME = 'bbthe90s'
+COL_NAME = 'products'
 
 PRODUCT_PORT = 'PRODUCT_PORT'
 
@@ -21,7 +19,7 @@ def connect_to_db():
     db_port = int(os.environ.get(DB_PORT))
     db_username = os.environ.get(DB_USER)
     db_pw = os.environ.get(DB_PW)
-    
+
     if not db_addr or not db_port:
         # try default connection settings
         client = MongoClient()
