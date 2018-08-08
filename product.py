@@ -52,5 +52,5 @@ def get_products_from_db():
 
 if __name__ == '__main__':
     PORT = os.environ.get(PRODUCT_PORT)
-    ADDR = os.enviorn.get(PRODUCT_ADDR)
+    ADDR = os.environ.get(PRODUCT_ADDR)
     app.run(host=ADDR, port=PORT)
