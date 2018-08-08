@@ -13,6 +13,7 @@ DB_NAME = 'bbthe90s'
 COL_NAME = 'products'
 
 PRODUCT_PORT = 'PRODUCT_PORT'
+PRODUCT_ADDR = 'PRODUCT_ADDR'
 
 def connect_to_db():
     db_addr = os.environ.get(DB_ADDR)
@@ -51,4 +52,5 @@ def get_products_from_db():
 
 if __name__ == '__main__':
     PORT = os.environ.get(PRODUCT_PORT)
-    app.run(host='127.0.0.1', port=PORT)
+    ADDR = os.enviorn.get(PRODUCT_ADDR)
+    app.run(host=ADDR, port=PORT)
