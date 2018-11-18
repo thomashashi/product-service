@@ -2,7 +2,10 @@ from flask import Flask
 from flask import jsonify
 from pymongo import MongoClient
 
+import copy
 import os
+import threading
+import uuid
 
 DB_ADDR = 'DB_ADDR'
 DB_PORT = 'DB_PORT'
@@ -28,7 +31,43 @@ def connect_to_db():
         client = MongoClient(db_addr, db_port)
     return client
 
+
+## Consul Support
+class ProductConfig(object):
+    def __init__(self):
+        super().__init__()
+        self.data = None
+        self.lock = threading.Lock()
+
+    def get(self):
+        with self.lock:
+            data = copy.deepcopy(self.data)
+
+        return data
+
+    def set(self, value):
+        with self.lock:
+            self.data = value
+
+def watch_config(config):
+    import consul
+    index = None
+    config.set(value=None)
+
+    c = consul.Consul()
+
+    while True:
+        index,data = c.kv.get("product/config", index)
+        if data == None:
+            config.set(None)
+        else:
+            config.set(data['Value'].decode('utf-8'))
+
+
 db_client = connect_to_db()
+config = ProductConfig()
+thread = threading.Thread(target=watch_config, args=(config,))
+thread.start()
 
 app = Flask(__name__)
 
@@ -41,7 +80,7 @@ prods = [{ 'inv_id': 1, 'name':'jncos', 'cost':35.57, 'img':None},
 @app.route("/product", methods=['GET'])
 def get_products():
     res = get_products_from_db()
-    return jsonify(res)
+    return jsonify({'res': res, 'instance_id': app.config['INSTANCE_ID'], 'conf': app.config['CONFIG'].get()})
 
 @app.route("/product/healthz", methods=['GET'])
 def get_health():
@@ -53,4 +92,8 @@ def get_products_from_db():
 if __name__ == '__main__':
     PORT = os.environ.get(PRODUCT_PORT)
     ADDR = os.environ.get(PRODUCT_ADDR)
+    INSTANCE_ID=str(uuid.uuid4())
+    app.config.update(
+            CONFIG=config,
+            INSTANCE_ID=INSTANCE_ID)
     app.run(host=ADDR, port=PORT)
