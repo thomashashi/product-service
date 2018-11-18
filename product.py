@@ -57,11 +57,14 @@ def watch_config(config):
     c = consul.Consul()
 
     while True:
-        index,data = c.kv.get("product/config", index)
-        if data == None:
-            config.set(None)
-        else:
-            config.set(data['Value'].decode('utf-8'))
+        try:
+            index,data = c.kv.get("product/config", index)
+            if data == None:
+                config.set(None)
+            else:
+                config.set(data['Value'].decode('utf-8'))
+        except requests.exceptions:
+            pass
 
 
 db_client = connect_to_db()
