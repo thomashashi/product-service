@@ -1,10 +1,12 @@
 from flask import Flask
 from flask import jsonify
 from pymongo import MongoClient
+import requests
 
 import copy
 import os
 import threading
+import time
 import uuid
 
 DB_ADDR = 'DB_ADDR'
@@ -70,7 +72,8 @@ def watch_config(config):
                     new_data[key] = value
                 new_data['datacenter']=c.agent.self().get('Config').get('Datacenter')
                 config.set(new_data)
-        except requests.exceptions:
+        except (requests.exceptions.RequestException, consul.base.ConsulException):
+            time.sleep(1)
             pass
 
 
