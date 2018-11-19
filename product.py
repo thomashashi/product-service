@@ -49,6 +49,7 @@ class ProductConfig(object):
         with self.lock:
             self.data = value
 
+
 def watch_config(config):
     import consul
     index = None
@@ -58,11 +59,17 @@ def watch_config(config):
 
     while True:
         try:
-            index,data = c.kv.get("product/config", index)
+            index,data = c.kv.get("product/", index=index, recurse=True)
             if data == None:
                 config.set(None)
             else:
-                config.set(data['Value'].decode('utf-8'))
+                new_data = dict()
+                for datum in data:
+                    key = datum['Key'].replace('product/', '', 1)
+                    value = datum['Value'].decode('utf-8')
+                    new_data[key] = value
+                new_data['datacenter']=c.agent.self().get('Config').get('Datacenter')
+                config.set(new_data)
         except requests.exceptions:
             pass
 
@@ -87,7 +94,12 @@ def get_products():
 
 @app.route("/product/healthz", methods=['GET'])
 def get_health():
-    return "OK"
+    health = app.config['CONFIG'].get().get('run', None)
+    if health == None or health == 'true':
+        return "OK"
+    else:
+        return "UNHEALTHY", 503
+
 
 def get_products_from_db():
     return [rec for rec in db_client[DB_NAME][COL_NAME].find({}, {'_id': False})]
