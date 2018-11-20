@@ -68,7 +68,9 @@ def watch_config(config):
                 new_data = dict()
                 for datum in data:
                     key = datum['Key'].replace('product/', '', 1)
-                    value = datum['Value'].decode('utf-8')
+                    value = datum['Value']
+                    if value is not None:
+                        value = value.decode('utf-8')
                     new_data[key] = value
                 new_data['datacenter']=c.agent.self().get('Config').get('Datacenter')
                 config.set(new_data)
@@ -97,8 +99,13 @@ def get_products():
 
 @app.route("/product/healthz", methods=['GET'])
 def get_health():
-    health = app.config['CONFIG'].get().get('run', None)
-    if health == None or health == 'true':
+    global_health = app.config['CONFIG'].get().get('run', None)
+    my_health = app.config['CONFIG'].get().get('stop-{}'.format(
+        app.config['INSTANCE_ID']), None)
+
+    if my_health is not None:
+        return "UNHEALTHY", 503
+    elif global_health == None or global_health == 'true':
         return "OK"
     else:
         return "UNHEALTHY", 503
