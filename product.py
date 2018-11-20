@@ -38,7 +38,7 @@ def connect_to_db():
 class ProductConfig(object):
     def __init__(self):
         super().__init__()
-        self.data = None
+        self.data = dict()
         self.lock = threading.Lock()
 
     def get(self):
