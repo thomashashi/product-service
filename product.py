@@ -55,15 +55,22 @@ class ProductConfig(object):
 def watch_config(config):
     import consul
     index = None
-    config.set(value=None)
+    config.set(value=dict())
+    c = None
 
-    c = consul.Consul()
+    while True:
+        try:
+            c = consul.Consul()
+            break
+        except:
+            time.sleep(1)
+
 
     while True:
         try:
             index,data = c.kv.get("product/", index=index, recurse=True)
             if data == None:
-                config.set(None)
+                config.set(dict())
             else:
                 new_data = dict()
                 for datum in data:
