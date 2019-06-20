@@ -78,7 +78,7 @@ def watch_config(config):
                     value = datum['Value']
                     if value is not None:
                         value = value.decode('utf-8')
-                    new_data[key] = value
+                        new_data[key] = value
                 new_data['datacenter']=c.agent.self().get('Config').get('Datacenter')
                 config.set(new_data)
         except (requests.exceptions.RequestException, consul.base.ConsulException):
